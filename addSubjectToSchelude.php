@@ -18,11 +18,11 @@
      $selectNumOrDen = mysqli_real_escape_string($connection, $_POST['selectNumOrDen']);
      if ($selectNumOrDen == 0) 
      {
-        $numOrDen = 'Числитель';
+        $numOrDen = '0';
      }
      else
      {
-        $numOrDen = 'Знаменатель';
+        $numOrDen = '1';
      }
  
      $result = $connection->query("INSERT INTO `Shedule` (`PairNumber`, `SubjectID`, `LessonTypeID`, `GroupNumber`, `SubjectStartDate`, `SubjectEndDate`, `NumeratorOrDenominator`, `DayOfTheWeek`) VALUES ('$selectTime', '$subjectID', '$lessonTypeID', '$groupNumber', '$start', '2023-04-01', '$numOrDen', '$selectDay');");     
