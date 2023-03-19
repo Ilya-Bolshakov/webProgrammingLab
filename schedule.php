@@ -17,6 +17,11 @@
                 header('Location: /');
             }
         }
+
+        $item = new Item;
+
+        $timeLesson = $connection->query("SELECT StartLesson, EndLesson FROM `ClassTime`");
+        $item->setTimeLesson($timeLesson);
 ?>
 
 <!doctype html>
@@ -55,7 +60,7 @@
             <th scope="row">Понедельник</th>
             <td>
                 <table class="table table-borderless">
-                    <tr><td>числ. Программирование<br> Лекция</td></tr>
+                    <tr><td> gfhfgh <br> Лекция</td></tr>
                     <tr><td>знам. Математика</td></tr>
                 </table>
             </td>
