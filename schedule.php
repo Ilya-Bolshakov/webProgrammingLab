@@ -51,7 +51,7 @@
             {
                 $schedule[$row['DayOfTheWeek']] = new scheduleDay($row['DayOfTheWeek']);
             }
-            array_push($schedule[$row['DayOfTheWeek']]->$subjects, new subject($row));
+            array_push($schedule[$row['DayOfTheWeek']]->subjects, new subject($row));
         }
 
         echo '<pre>';
