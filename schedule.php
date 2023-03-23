@@ -47,14 +47,14 @@
 
         while ($row = $result->fetch_assoc()) 
         {
-            if ($schedule[$row['DayOfTheWeek']] == NULL)
+            if (!isset($schedule[$row['DayOfTheWeek']]))
             {
                 $schedule[$row['DayOfTheWeek']] = new scheduleDay($row['DayOfTheWeek']);
             }
-            if ($schedule[$row['DayOfTheWeek']]->subjects[$row['NumeratorOrDenominator']] == NULL) {
+            if (!isset($schedule[$row['DayOfTheWeek']]->subjects[$row['NumeratorOrDenominator']])) {
                 $schedule[$row['DayOfTheWeek']]->subjects[$row['NumeratorOrDenominator']] = array();
             }
-            array_push($schedule[$row['DayOfTheWeek']]->subjects[$row['NumeratorOrDenominator']], new subject($row));
+            $schedule[$row['DayOfTheWeek']]->subjects[$row['NumeratorOrDenominator']][$row['PairNumber']] = new subject($row);
         }
 ?>
 
@@ -99,23 +99,32 @@
                     if (!isset($schedule[$i])) {
                         continue;
                     }
-                    if (is_array($schedule[$i]->subjects[0])) {
-                        $numSize = count($schedule[$i]->subjects[0]);
-                        $maxDayTime = 0;
-                    }
-                    if (is_array($schedule[$i]->subjects[1])) {
-                        $denSize = count($schedule[$i]->subjects[1]);
-                        $maxDayTime = 1;
-                    }
-                    $rowSpan = $numSize >= $denSize ? $numSize : $denSize;
-                    echo "<tr>";
+                    $dayOfTheWeek = mysqli_real_escape_string($connection, $i);
+                    $result = $connection->query("SELECT min(PairNumber) as mi, max(PairNumber) as ma
+                    FROM Shedule
+                    WHERE DayOfTheWeek = '$dayOfTheWeek'");
+                    $data = $result->fetch_assoc();
+                    $minPair = $data['mi'];
+                    $maxPair = $data['ma'];
+                    $rowSpan = $maxPair - $minPair + 1;
                     echo '<th scope="row" rowspan="' . $rowSpan . '">' . $schedule[$i]->textDay . '</th>';
                     for ($j = 1; $j <= $rowSpan; $j++) {
-                        echo '<td>'.$schedule[$i]->subjects[0][$j]->pairNumber.'</td>';
-                        echo '<td>'.$schedule[$i]->subjects[0][$j]->subjectName.'</td>';
-                        echo '<td>'.$schedule[$i]->subjects[1][$j]->subjectName.'</td>';
+                        echo '<td>'.($minPair + $j - 1).'</td>';
+                        if (isset($schedule[$i]->subjects[0][$j]->subjectName)) {
+                            echo '<td>'.$schedule[$i]->subjects[0][$j]->subjectName.'</td>';
+                        }
+                        else {
+                            echo '<td>-</td>';
+                        }
+                        if (isset($schedule[$i]->subjects[1][$j]->subjectName)) {
+                            echo '<td>'.$schedule[$i]->subjects[1][$j]->subjectName.'</td>';
+                        }
+                        else {
+                            echo '<td>-</td>';
+                        }
+                        echo '</tr>';
+                        
                     }
-                    echo '</tr>';
                 } 
                 ?>
             <!-- <tr>
