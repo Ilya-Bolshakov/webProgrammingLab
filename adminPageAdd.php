@@ -1,11 +1,44 @@
 <?php
-     $connection = mysqli_connect("server42.hosting.reg.ru", "u1960216_default", "X6z7Y08TBcsaxY3I", "u1960216_webprogrammingrsreu");
-     $connection->query("SET NAMES utf8");
+    $connection = mysqli_connect("server42.hosting.reg.ru", "u1960216_default", "X6z7Y08TBcsaxY3I", "u1960216_webprogrammingrsreu");
+    $connection->query("SET NAMES utf8");
 
-     if (!$connection)
-     {
-         die("Ошибка подключения: " . mysqli_connect_error());
-     }
+    if (!$connection)
+    {
+        die("Ошибка подключения: " . mysqli_connect_error());
+    }
+
+    if ($_SERVER["REQUEST_METHOD"]=="POST")
+    {
+        $numOrDen;
+        $selectTime = mysqli_real_escape_string($connection, $_POST['selectTime']);
+        $subjectID = mysqli_real_escape_string($connection, $_POST['selectSubject']);
+        $lessonTypeID = mysqli_real_escape_string($connection, $_POST['selectType']);
+        $groupNumber = mysqli_real_escape_string($connection, $_POST['groupNumber']);
+        $selectDay = mysqli_real_escape_string($connection, $_POST['selectDay']);
+        $start = mysqli_real_escape_string($connection, $_POST['start']);
+        $end = mysqli_real_escape_string($connection, $_POST['end']);
+        $selectNumOrDen = mysqli_real_escape_string($connection, $_POST['selectNumOrDen']);
+        if ($selectNumOrDen == 0) 
+        {
+           $numOrDen = '0';
+        }
+        else
+        {
+           $numOrDen = '1';
+        }
+    
+        $result = $connection->query("INSERT INTO `Shedule` (`PairNumber`, `SubjectID`, `LessonTypeID`, `GroupNumber`, `SubjectStartDate`, `SubjectEndDate`, `NumeratorOrDenominator`, `DayOfTheWeek`) VALUES ('$selectTime', '$subjectID', '$lessonTypeID', '$groupNumber', '$start', '$end', '$numOrDen', '$selectDay');");
+        if ($result == false) {
+            $errors['insert'] = 'Данный предмет с таким типом и временем уже имеется в расписании';
+        }  
+        else {
+            $errors['insert'] = NULL;
+            header('Location: adminPageAdd.php');
+        }
+        
+    }
+
+     
      $userId = mysqli_real_escape_string($connection, $_COOKIE['userId']);
 	
 		$result = $connection->query("SELECT Role FROM `users` WHERE `id` = '$userId'");
@@ -59,7 +92,7 @@
         <div class="row">
             <div class="col">
                 <h1 class="d-flex justify-content-center">Добавление предмета в расписание</h1>
-<form name="form" action="addSubjectToSchelude.php" method="post" onsubmit="return validateAddScheludeForm()">
+<form name="form" method="post" onsubmit="return validateAddScheludeForm()">
         <div class="form-group row">
             <label for="staticEmail" class="col-sm-2 col-form-label">Название дисциплины</label>
             <div class="col-sm-4">
@@ -131,6 +164,11 @@
         <input type="date" name="end"/>
             </div>
         </div>
+        <?php if (isset($errors['insert'])): ?>
+                        <div class="alert alert-danger" role="alert">
+                            <?= $errors['insert'] ?>
+                        </div>
+						<?php endif; ?>
         <div id="groupError" class="alert alert-danger">
 					
 		</div>

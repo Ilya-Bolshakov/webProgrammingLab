@@ -37,7 +37,7 @@
 
         $schedule = array();
 
-        $result = $connection->query("SELECT DayOfTheWeek, Shedule.PairNumber, Subjects.SubjectName, LessonTypes.LessonType, ClassTime.StartLesson, ClassTime.EndLesson, Shedule.NumeratorOrDenominator 
+        $result = $connection->query("SELECT DayOfTheWeek, Shedule.PairNumber, Subjects.SubjectName, LessonTypes.LessonType, ClassTime.StartLesson, ClassTime.EndLesson, Shedule.NumeratorOrDenominator, LessonTypes.reduction
         from Shedule
         join ClassTime on ClassTime.PairNumber = Shedule.PairNumber
         join Subjects on Subjects.SubjectID = Shedule.SubjectID
@@ -57,9 +57,6 @@
             $schedule[$row['DayOfTheWeek']]->subjects[$row['NumeratorOrDenominator']][$row['PairNumber']] = new subject($row);
         }
 ?>
-
-
-
 
 
 <!doctype html>
@@ -93,66 +90,66 @@
                     
                 </tr>
             </thead>
-        <tbody>
-            <?php 
-                for ($i=1; $i <= 6; $i++) { 
-                    if (!isset($schedule[$i])) {
-                        continue;
-                    }
-                    $dayOfTheWeek = mysqli_real_escape_string($connection, $i);
-                    $result = $connection->query("SELECT min(PairNumber) as mi, max(PairNumber) as ma
-                    FROM Shedule
-                    WHERE DayOfTheWeek = '$dayOfTheWeek'");
-                    $data = $result->fetch_assoc();
-                    $minPair = $data['mi'];
-                    $maxPair = $data['ma'];
-                    $rowSpan = $maxPair - $minPair + 1;
-                    echo '<th scope="row" rowspan="' . $rowSpan . '">' . $schedule[$i]->textDay . '</th>';
-                    for ($j = 1; $j <= $rowSpan; $j++) {
-                        echo '<td>'.($minPair + $j - 1).'</td>';
-                        if (isset($schedule[$i]->subjects[0][$j]->subjectName)) {
-                            echo '<td>'.$schedule[$i]->subjects[0][$j]->subjectName.'</td>';
+            <tbody>
+                <?php 
+                    for ($i=1; $i <= 6; $i++) { 
+                        if (!isset($schedule[$i])) {
+                            continue;
                         }
-                        else {
-                            echo '<td>-</td>';
-                        }
-                        if (isset($schedule[$i]->subjects[1][$j]->subjectName)) {
-                            echo '<td>'.$schedule[$i]->subjects[1][$j]->subjectName.'</td>';
-                        }
-                        else {
-                            echo '<td>-</td>';
-                        }
-                        echo '</tr>';
-                        
-                    }
-                } 
-                ?>
-            <!-- <tr>
-            <th scope="row" rowspan="5">Понедельник</th>
-            <td>
-                
-            </td>
-            
-            </tr>
+                        $dayOfTheWeek = mysqli_real_escape_string($connection, $i);
+                        $result = $connection->query("SELECT min(PairNumber) as mi, max(PairNumber) as ma
+                        FROM Shedule
+                        WHERE DayOfTheWeek = '$dayOfTheWeek'");
+                        $data = $result->fetch_assoc();
+                        $minPair = $data['mi'];
+                        $maxPair = $data['ma'];
+                        $rowSpan = $maxPair - $minPair + 1;
+                        echo '<th scope="row" rowspan="' . $rowSpan . '">' . $schedule[$i]->textDay . '</th>';
+                        for ($j = $minPair; $j <= $maxPair; $j++) {
+                            if(isset($schedule[$i]->subjects[0][$j])) {
+                                $start = strtotime($schedule[$i]->subjects[0][$j]->startLesson);
+                                $end = strtotime($schedule[$i]->subjects[0][$j]->endLesson);
+                                echo '<td>'.date("H:i", $start).' - '.date('H:i',$end).'</td>';
+                            }
+                            else {
+                                if(isset($schedule[$i]->subjects[1][$j])) {
+                                    $start = strtotime($schedule[$i]->subjects[1][$j]->startLesson);
+                                    $end = strtotime($schedule[$i]->subjects[1][$j]->endLesson);
+                                    echo '<td>'.date("H:i", $start).' - '.date('H:i',$end).'</td>';
+                                }
+                                else {
+                                    $classTime = mysqli_real_escape_string($connection, $j);
+                                    $result = $connection->query("SELECT StartLesson, EndLesson
+                                                                  FROM ClassTime 
+                                                                  WHERE PairNumber  = '$classTime'");
+                                    $times = $result->fetch_assoc();
+                                    $start = strtotime($times['StartLesson']);
+                                    $end = strtotime($times['EndLesson']);
+                                    echo '<td>'.date("H:i", $start).' - '.date('H:i',$end).'</td>';
+                                }
+                            }
+                            
 
-            
-            <tr>
-            <th scope="row">9:45-11:30</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            </tr> -->
-
-        </tbody>
-</table>
-
+                            if (isset($schedule[$i]->subjects[0][$j]->subjectName)) {
+                                echo '<td>'.$schedule[$i]->subjects[0][$j]->getFormatString().'</td>';
+                            }
+                            else {
+                                echo '<td>-</td>';
+                            }
+                            if (isset($schedule[$i]->subjects[1][$j]->subjectName)) {
+                                echo '<td>'.$schedule[$i]->subjects[1][$j]->getFormatString().'</td>';
+                            }
+                            else {
+                                echo '<td>-</td>';
+                            }
+                            echo '</tr>';
+                            
+                        }
+                    } 
+                    ?>
+            </tbody>
+        </table>
     </div>
-
-
-    
-    
-    
-    
-    
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
