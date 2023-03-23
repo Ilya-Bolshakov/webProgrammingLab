@@ -9,6 +9,9 @@
     {
         die("Ошибка подключения: " . mysqli_connect_error());
     }
+    if (!isset($_COOKIE['userId'])) {
+        header('Location: /');
+    }
     $userId = mysqli_real_escape_string($connection, $_COOKIE['userId']);
    
        $result = $connection->query("SELECT Role, student_group FROM `users` WHERE `id` = '$userId'");

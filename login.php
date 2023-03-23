@@ -13,27 +13,20 @@ if (isset($_COOKIE['userId']) == 1)
 		{
 			die("Ошибка подключения: " . mysqli_connect_error());
 		}
-
-		$userId = mysqli_real_escape_string($connection, $_COOKIE['userId']);
-	
-		$result = $connection->query("SELECT Role FROM `users` WHERE `id` = '$userId'");
-        $roleId = $result->fetch_assoc()['Role'];
-        if (!isset($roleId) || $roleId == 0)
-        {
-            header('Location: /');
-        }
 	
 		$login = mysqli_real_escape_string($connection, $_POST["login"]);
 		$pass = mysqli_real_escape_string($connection, $_POST["pass"]);
-	
+		
 		
 	
 		// Хешируем пароль
 		$pass = md5($pass);
 	
 		$result = $connection->query("SELECT * FROM `users` WHERE `login` = '$login' AND `password` = '$pass'");
+		
 		if ($result->num_rows == 0)
 		{
+			
 			$errors['login'] = "Логин или пароль введены неверно.";
 			$connection->close();
 		}
