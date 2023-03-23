@@ -95,6 +95,14 @@
             </thead>
             <tbody>
                 <?php 
+                    $result = $connection->query("SELECT max(semesterStart) as start
+                    FROM semesterStart");
+                    $startSemester = $result->fetch_assoc()['start'];
+                    $diff = date_diff(new DateTime(), new DateTime($startSemester))->days;
+                    $diff /= 7;
+                    $diff = round($diff);
+                    $diff %= 2;
+                    $n = date("w", mktime(0,0,0,date("m"),date("d"),date("Y")));
                     for ($i=1; $i <= 6; $i++) { 
                         if (!isset($schedule[$i])) {
                             continue;
@@ -132,15 +140,29 @@
                                 }
                             }
                             
+                            $result = $connection->query("SELECT PairNumber from ClassTime
+                            where CURTIME() BETWEEN StartLesson and EndLesson");
+                            $currentPair = $result->fetch_assoc()['PairNumber'];                            
 
                             if (isset($schedule[$i]->subjects[0][$j]->subjectName)) {
-                                echo '<td>'.$schedule[$i]->subjects[0][$j]->getFormatString().'</td>';
+                                
+                                $td = '<td';
+                                if ($n == $i AND $currentPair == $j AND $diff == 0) {
+                                    $td .= ' class="table-primary"';
+                                }
+                                $td .= '>'.$schedule[$i]->subjects[0][$j]->getFormatString().'</td>';
+                                echo $td;
                             }
                             else {
                                 echo '<td>-</td>';
                             }
                             if (isset($schedule[$i]->subjects[1][$j]->subjectName)) {
-                                echo '<td>'.$schedule[$i]->subjects[1][$j]->getFormatString().'</td>';
+                                $td = '<td';
+                                if ($n == $i AND $currentPair == $j AND $diff == 1) {
+                                    $td .= ' class="table-primary"';
+                                }
+                                $td .= '>'.$schedule[$i]->subjects[1][$j]->getFormatString().'</td>';
+                                echo $td;
                             }
                             else {
                                 echo '<td>-</td>';
