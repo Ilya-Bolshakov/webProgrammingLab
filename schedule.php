@@ -51,12 +51,11 @@
             {
                 $schedule[$row['DayOfTheWeek']] = new scheduleDay($row['DayOfTheWeek']);
             }
-            array_push($schedule[$row['DayOfTheWeek']]->subjects, new subject($row));
+            if ($schedule[$row['DayOfTheWeek']]->subjects[$row['NumeratorOrDenominator']] == NULL) {
+                $schedule[$row['DayOfTheWeek']]->subjects[$row['NumeratorOrDenominator']] = array();
+            }
+            array_push($schedule[$row['DayOfTheWeek']]->subjects[$row['NumeratorOrDenominator']], new subject($row));
         }
-
-        echo '<pre>';
-print_r($schedule);
-echo '</pre>';
 ?>
 
 
@@ -95,16 +94,36 @@ echo '</pre>';
                 </tr>
             </thead>
         <tbody>
-            <tr>
+            <?php 
+                for ($i=1; $i <= 6; $i++) { 
+                    if (!isset($schedule[$i])) {
+                        continue;
+                    }
+                    if (is_array($schedule[$i]->subjects[0])) {
+                        $numSize = count($schedule[$i]->subjects[0]);
+                        $maxDayTime = 0;
+                    }
+                    if (is_array($schedule[$i]->subjects[1])) {
+                        $denSize = count($schedule[$i]->subjects[1]);
+                        $maxDayTime = 1;
+                    }
+                    $rowSpan = $numSize >= $denSize ? $numSize : $denSize;
+                    echo "<tr>";
+                    echo '<th scope="row" rowspan="' . $rowSpan . '">' . $schedule[$i]->textDay . '</th>';
+                    for ($j = 1; $j <= $rowSpan; $j++) {
+                        echo '<td>'.$schedule[$i]->subjects[0][$j]->pairNumber.'</td>';
+                        echo '<td>'.$schedule[$i]->subjects[0][$j]->subjectName.'</td>';
+                        echo '<td>'.$schedule[$i]->subjects[1][$j]->subjectName.'</td>';
+                    }
+                    echo '</tr>';
+                } 
+                ?>
+            <!-- <tr>
             <th scope="row" rowspan="5">Понедельник</th>
-            <td>8:10-9:45</td>
             <td>
-                Программирование. Лекция<br>
                 
             </td>
-            <td>
-                Математика
-            </td>
+            
             </tr>
 
             
@@ -112,7 +131,7 @@ echo '</pre>';
             <th scope="row">9:45-11:30</th>
             <td>Mark</td>
             <td>Otto</td>
-            </tr>
+            </tr> -->
 
         </tbody>
 </table>
