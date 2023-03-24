@@ -27,12 +27,20 @@ function validateForm() {
     let errordiv = document.getElementById("groupError");
     errordiv.innerHTML = "";
 
-    let groupId = document.forms["registerForm"]["group"].value;
+    let groupId = document.forms["registerForm"]["group"].value; 
     let name = document.forms["registerForm"]["name"].value;
     let surname = document.forms["registerForm"]["surname"].value;
     let patr = document.forms["registerForm"]["patronymic"].value;
     let login = document.forms["registerForm"]["login"].value;
     let pass = document.forms["registerForm"]["pass"].value;
+
+    if (groupId == 940)
+    {
+        errordiv.style.visibility = 'visible';
+        const text = document.createTextNode('Ты не имеешь права тут учиться!\n');
+        errordiv.appendChild(text);
+        isValidate = false;
+    }
 
     if (!parseInt(groupId) || groupId < 0) {
         errordiv.style.visibility = 'visible';
